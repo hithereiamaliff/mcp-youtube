@@ -53,6 +53,8 @@ export function createYouTubeMcpServer() {
                         "videos_getVideo",
                         "videos_searchVideos",
                         "transcripts_getTranscript",
+                        "transcripts_searchTranscript",
+                        "transcripts_getTimestampedTranscript",
                         "channels_getChannel",
                         "channels_listVideos",
                         "playlists_getPlaylist",
@@ -187,6 +189,53 @@ export function createYouTubeMcpServer() {
         },
         async ({ videoId, language }) => {
             const result = await transcriptService.getTranscript({ videoId, language });
+            return {
+                content: [{
+                    type: 'text',
+                    text: JSON.stringify(result, null, 2)
+                }]
+            };
+        }
+    );
+
+    // Register transcript search tool
+    server.registerTool(
+        'transcripts_searchTranscript',
+        {
+            title: 'Search Video Transcript',
+            description: 'Search within a YouTube video transcript for specific text',
+            annotations: { readOnlyHint: true, idempotentHint: true },
+            inputSchema: {
+                videoId: z.string().describe('The YouTube video ID'),
+                query: z.string().describe('Text to search for within the transcript'),
+                language: z.string().optional().describe('Language code for the transcript'),
+            },
+        },
+        async ({ videoId, query, language }) => {
+            const result = await transcriptService.searchTranscript({ videoId, query, language });
+            return {
+                content: [{
+                    type: 'text',
+                    text: JSON.stringify(result, null, 2)
+                }]
+            };
+        }
+    );
+
+    // Register timestamped transcript tool
+    server.registerTool(
+        'transcripts_getTimestampedTranscript',
+        {
+            title: 'Get Timestamped Transcript',
+            description: 'Get a YouTube video transcript with human-readable timestamps',
+            annotations: { readOnlyHint: true, idempotentHint: true },
+            inputSchema: {
+                videoId: z.string().describe('The YouTube video ID'),
+                language: z.string().optional().describe('Language code for the transcript'),
+            },
+        },
+        async ({ videoId, language }) => {
+            const result = await transcriptService.getTimestampedTranscript({ videoId, language });
             return {
                 content: [{
                     type: 'text',

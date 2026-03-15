@@ -41,21 +41,6 @@ declare namespace google {
   }
 }
 
-// YouTube Transcript
-declare module 'youtube-transcript' {
-  export interface TranscriptLine {
-    text: string;
-    offset: number;
-    duration: number;
-  }
-
-  export class YoutubeTranscript {
-    static fetchTranscript(videoId: string): Promise<TranscriptLine[]>;
-  }
-
-  export default YoutubeTranscript;
-}
-
 // YTDL Core
 declare module 'ytdl-core' {
   export interface VideoInfo {

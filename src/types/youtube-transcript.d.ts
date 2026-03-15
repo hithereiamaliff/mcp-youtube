@@ -1,13 +1,13 @@
-declare module 'youtube-transcript' {
-  export interface TranscriptLine {
-    text: string;
-    offset: number;
-    duration: number;
-  }
-
-  export class YoutubeTranscript {
-    static fetchTranscript(videoId: string): Promise<TranscriptLine[]>;
-  }
-
-  export default YoutubeTranscript;
+declare module 'youtube-transcript/dist/youtube-transcript.esm.js' {
+  export {
+    YoutubeTranscriptError,
+    YoutubeTranscriptTooManyRequestError,
+    YoutubeTranscriptVideoUnavailableError,
+    YoutubeTranscriptDisabledError,
+    YoutubeTranscriptNotAvailableError,
+    YoutubeTranscriptNotAvailableLanguageError,
+    YoutubeTranscript,
+    fetchTranscript,
+  } from 'youtube-transcript';
+  export type { TranscriptConfig, TranscriptResponse } from 'youtube-transcript';
 }
