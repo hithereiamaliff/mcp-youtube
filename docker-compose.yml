@@ -1,0 +1,10 @@
+services:
+  youtube-mcp:
+    build: .
+    container_name: youtube-mcp
+    restart: unless-stopped
+    ports:
+      - "8086:8080"
+    environment:
+      - NODE_ENV=production
+      - YOUTUBE_TRANSCRIPT_LANG=${YOUTUBE_TRANSCRIPT_LANG:-}

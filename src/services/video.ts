@@ -7,9 +7,12 @@ import { VideoParams, SearchParams, TrendingParams, RelatedVideosParams } from '
 export class VideoService {
   private youtube;
   private initialized = false;
+  private apiKey?: string;
+  private allowEnvFallback: boolean;
 
-  constructor() {
-    // Don't initialize in constructor
+  constructor(apiKey?: string, allowEnvFallback = true) {
+    this.apiKey = apiKey;
+    this.allowEnvFallback = allowEnvFallback;
   }
 
   /**
@@ -43,9 +46,9 @@ export class VideoService {
   private initialize() {
     if (this.initialized) return;
     
-    const apiKey = process.env.YOUTUBE_API_KEY;
+    const apiKey = this.apiKey || (this.allowEnvFallback ? process.env.YOUTUBE_API_KEY : undefined);
     if (!apiKey) {
-      throw new Error('YOUTUBE_API_KEY environment variable is not set.');
+      throw new Error('A YouTube API key is required for video operations.');
     }
 
     this.youtube = google.youtube({

@@ -7,23 +7,39 @@ import { TranscriptParams, SearchTranscriptParams } from '../types.js';
  * changing the MCP tool contract.
  */
 export class TranscriptService {
+  private defaultLanguage?: string;
+  private allowEnvLanguageFallback: boolean;
+
+  constructor(defaultLanguage?: string, allowEnvLanguageFallback = true) {
+    this.defaultLanguage = defaultLanguage;
+    this.allowEnvLanguageFallback = allowEnvLanguageFallback;
+  }
+
+  private resolveLanguage(language?: string): string | undefined {
+    return language
+      || this.defaultLanguage
+      || (this.allowEnvLanguageFallback ? process.env.YOUTUBE_TRANSCRIPT_LANG : undefined)
+      || undefined;
+  }
+
   /**
    * Get the transcript of a YouTube video.
    */
   async getTranscript({
     videoId,
-    language = process.env.YOUTUBE_TRANSCRIPT_LANG || undefined,
+    language,
   }: TranscriptParams): Promise<{
     videoId: string;
     language?: string;
     transcript: TranscriptSegment[];
   }> {
     try {
-      const transcript = await fetchTranscript(videoId, language ? { lang: language } : undefined);
+      const resolvedLanguage = this.resolveLanguage(language);
+      const transcript = await fetchTranscript(videoId, resolvedLanguage ? { lang: resolvedLanguage } : undefined);
 
       return {
         videoId,
-        language,
+        language: resolvedLanguage,
         transcript,
       };
     } catch (error) {
@@ -38,7 +54,7 @@ export class TranscriptService {
   async searchTranscript({
     videoId,
     query,
-    language = process.env.YOUTUBE_TRANSCRIPT_LANG || undefined,
+    language,
   }: SearchTranscriptParams): Promise<{
     videoId: string;
     language?: string;
@@ -47,7 +63,8 @@ export class TranscriptService {
     totalMatches: number;
   }> {
     try {
-      const transcript = await fetchTranscript(videoId, language ? { lang: language } : undefined);
+      const resolvedLanguage = this.resolveLanguage(language);
+      const transcript = await fetchTranscript(videoId, resolvedLanguage ? { lang: resolvedLanguage } : undefined);
 
       const matches = transcript.filter((item) =>
         item.text.toLowerCase().includes(query.toLowerCase()),
@@ -55,7 +72,7 @@ export class TranscriptService {
 
       return {
         videoId,
-        language,
+        language: resolvedLanguage,
         query,
         matches,
         totalMatches: matches.length,
@@ -71,7 +88,7 @@ export class TranscriptService {
    */
   async getTimestampedTranscript({
     videoId,
-    language = process.env.YOUTUBE_TRANSCRIPT_LANG || undefined,
+    language,
   }: TranscriptParams): Promise<{
     videoId: string;
     language?: string;
@@ -83,7 +100,8 @@ export class TranscriptService {
     }>;
   }> {
     try {
-      const transcript = await fetchTranscript(videoId, language ? { lang: language } : undefined);
+      const resolvedLanguage = this.resolveLanguage(language);
+      const transcript = await fetchTranscript(videoId, resolvedLanguage ? { lang: resolvedLanguage } : undefined);
 
       const timestampedTranscript = transcript.map((item) => {
         const seconds = item.offset / 1000;
@@ -101,7 +119,7 @@ export class TranscriptService {
 
       return {
         videoId,
-        language,
+        language: resolvedLanguage,
         timestampedTranscript,
       };
     } catch (error) {

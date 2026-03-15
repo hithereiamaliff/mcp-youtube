@@ -3,7 +3,7 @@ import { createYouTubeMcpServer } from './server-utils.js';
 
 // Configuration schema for Smithery
 export const configSchema = z.object({
-    youtubeApiKey: z.string().optional().describe("Your YouTube Data API v3 key. Required for all operations. Can also be provided via YOUTUBE_API_KEY environment variable."),
+    youtubeApiKey: z.string().optional().describe("Your YouTube Data API v3 key. Required for YouTube Data API operations."),
     youtubeTranscriptLang: z.string().optional().describe("Default language code for YouTube transcripts (e.g., 'en', 'es', 'fr', 'de', 'ms', 'th'). Leave blank to auto-detect from video."),
 });
 
@@ -18,13 +18,16 @@ export const configJsonSchema = {
         "youtubeApiKey": {
             "type": "string",
             "title": "YouTube Data API Key",
-            "description": "Your YouTube Data API v3 key. Required for all operations. Can also be provided via YOUTUBE_API_KEY environment variable.",
-            "secret": true
+            "description": "Your YouTube Data API v3 key. Required for YouTube Data API operations.",
+            "secret": true,
+            "x-from": "header",
+            "x-header-name": "x-youtube-api-key"
         },
         "youtubeTranscriptLang": {
             "type": "string",
             "title": "Default Transcript Language",
-            "description": "Default language code for YouTube transcripts (e.g., 'en', 'es', 'fr', 'de', 'ms', 'th'). Leave blank to auto-detect from video."
+            "description": "Default language code for YouTube transcripts (e.g., 'en', 'es', 'fr', 'de', 'ms', 'th'). Leave blank to auto-detect from video.",
+            "x-from": "query"
         }
     },
     "required": [],
@@ -34,16 +37,10 @@ export const configJsonSchema = {
 
 // Required: Export default createServer function for Smithery
 export default function createServer({ config }: { config?: z.infer<typeof configSchema> }) {
-    // Set environment variables from config before creating the server
-    if (config?.youtubeApiKey) {
-        process.env.YOUTUBE_API_KEY = config.youtubeApiKey;
-    }
-    if (config?.youtubeTranscriptLang) {
-        process.env.YOUTUBE_TRANSCRIPT_LANG = config.youtubeTranscriptLang;
-    }
-
-    // Create the server using shared utilities
-    const server = createYouTubeMcpServer();
+    const server = createYouTubeMcpServer({
+        apiKey: config?.youtubeApiKey,
+        transcriptLang: config?.youtubeTranscriptLang,
+    });
 
     // Must return the MCP server object for Smithery
     return server.server;

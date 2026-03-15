@@ -7,9 +7,12 @@ import { ChannelParams, ChannelVideosParams } from '../types.js';
 export class ChannelService {
   private youtube;
   private initialized = false;
+  private apiKey?: string;
+  private allowEnvFallback: boolean;
 
-  constructor() {
-    // Don't initialize in constructor
+  constructor(apiKey?: string, allowEnvFallback = true) {
+    this.apiKey = apiKey;
+    this.allowEnvFallback = allowEnvFallback;
   }
 
   /**
@@ -18,9 +21,9 @@ export class ChannelService {
   private initialize() {
     if (this.initialized) return;
     
-    const apiKey = process.env.YOUTUBE_API_KEY;
+    const apiKey = this.apiKey || (this.allowEnvFallback ? process.env.YOUTUBE_API_KEY : undefined);
     if (!apiKey) {
-      throw new Error('YOUTUBE_API_KEY environment variable is not set.');
+      throw new Error('A YouTube API key is required for channel operations.');
     }
 
     this.youtube = google.youtube({

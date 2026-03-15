@@ -8,10 +8,11 @@ config:
   properties:
     youtubeApiKey:
       type: string
-      description: "Your YouTube Data API v3 key. Required for all operations. Can also be provided as YOUTUBE_API_KEY environment variable."
+      description: "Your YouTube Data API v3 key. Required for YouTube Data API operations."
       secret: true
+      x-from: "header"
+      x-header-name: "x-youtube-api-key"
     youtubeTranscriptLang:
       type: string
-      description: "Default language for YouTube transcripts (e.g., 'en', 'es', 'fr', 'de')"
-      default: "en"
+      description: "Default language for YouTube transcripts (e.g., 'en', 'es', 'fr', 'de'). Leave blank to auto-detect from the video."
   required: []

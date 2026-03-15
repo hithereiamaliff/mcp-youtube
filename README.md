@@ -9,6 +9,8 @@ A Model Context Protocol (MCP) server for YouTube that exposes video, channel, p
 > Deployment: This project is deployed on Smithery only for now. MCP Key Service deployment is intentionally not included yet.
 >
 > Current package identity: The published Smithery/NPM package remains `@sfiorini/youtube-mcp` for now, while this repository is the maintained GitHub fork behind the fixes.
+>
+> Hosted auth model: For the remote HTTP deployment, Smithery should send each user's YouTube API key in the `x-youtube-api-key` header. Raw API keys in URL paths are no longer supported.
 
 ## Features
 
@@ -48,6 +50,22 @@ Install via Smithery for Claude Desktop:
 ```bash
 npx -y @smithery/cli@latest install @sfiorini/youtube-mcp --client claude
 ```
+
+### Hosted HTTP Deployment
+
+For the hosted remote deployment, use the MCP endpoint:
+
+```text
+https://mcp.techmavie.digital/youtube/mcp
+```
+
+Request-scoped config:
+* `x-youtube-api-key` header - required for YouTube Data API tools
+* `youtubeTranscriptLang` query param - optional default transcript language for that request
+
+Notes:
+* The transcript tools can still work without a YouTube Data API key.
+* Raw API keys in URL paths such as `/mcp/{apiKey}` are intentionally not supported anymore.
 
 ### Claude Desktop
 
@@ -120,13 +138,14 @@ Add this to VS Code user settings JSON or `.vscode/mcp.json`:
 
 ### Environment Variables
 
+For local stdio usage:
 * `YOUTUBE_API_KEY` - Required for YouTube Data API operations
 * `YOUTUBE_TRANSCRIPT_LANG` - Optional default transcript language. Leave unset to let YouTube choose the default caption track for each video.
 
 ### Smithery Configuration
 
 Smithery config keeps both fields optional:
-* `youtubeApiKey` - Can be provided in Smithery config or via `YOUTUBE_API_KEY`
+* `youtubeApiKey` - For hosted HTTP deployment, Smithery should forward this as the `x-youtube-api-key` header
 * `youtubeTranscriptLang` - Optional. Leave blank to auto-detect from the video's available captions
 
 ### YouTube API Setup
@@ -147,6 +166,10 @@ npm run typecheck
 npm start
 ```
 
+Notes:
+* `npm start` runs the local stdio server and expects `YOUTUBE_API_KEY` for YouTube Data API tools.
+* `npm run start:http` runs the hosted Streamable HTTP server and does not require a shared server-wide YouTube API key.
+
 ## Architecture
 
 This repo uses a shared service-based MCP design:
@@ -154,6 +177,7 @@ This repo uses a shared service-based MCP design:
 * `src/server-utils.ts` - Registers all tools, resources, and prompts
 * `src/index.ts` - Smithery entry point
 * `src/cli.ts` and `src/server.ts` - Local stdio startup path
+* `src/http-server.ts` - Hosted Streamable HTTP server for Smithery URL-published deployment
 * `src/services/` - Service layer for videos, channels, playlists, and transcripts
 * `src/services/transcript-provider.ts` - Transcript adapter layer so the MCP contract stays stable if the underlying provider changes
 
@@ -165,6 +189,7 @@ src/
 |-- index.ts
 |-- server.ts
 |-- cli.ts
+|-- http-server.ts
 |-- services/
 |   |-- video.ts
 |   |-- transcript.ts

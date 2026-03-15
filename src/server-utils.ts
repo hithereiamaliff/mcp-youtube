@@ -7,10 +7,17 @@ import { ChannelService } from './services/channel.js';
 
 const packageVersion = '0.1.12';
 
+export interface CreateServerOptions {
+    apiKey?: string;
+    transcriptLang?: string;
+    allowEnvApiKeyFallback?: boolean;
+    allowEnvTranscriptLangFallback?: boolean;
+}
+
 /**
  * Creates and configures a YouTube MCP server with all tools, resources, and prompts registered
  */
-export function createYouTubeMcpServer() {
+export function createYouTubeMcpServer(options?: CreateServerOptions) {
     const server = new McpServer({
         name: 'youtube-mcp',
         version: packageVersion,
@@ -22,10 +29,13 @@ export function createYouTubeMcpServer() {
         }
     });
 
-    const videoService = new VideoService();
-    const transcriptService = new TranscriptService();
-    const playlistService = new PlaylistService();
-    const channelService = new ChannelService();
+    const apiKey = options?.apiKey;
+    const allowEnvApiKeyFallback = options?.allowEnvApiKeyFallback ?? true;
+    const allowEnvTranscriptLangFallback = options?.allowEnvTranscriptLangFallback ?? true;
+    const videoService = new VideoService(apiKey, allowEnvApiKeyFallback);
+    const transcriptService = new TranscriptService(options?.transcriptLang, allowEnvTranscriptLangFallback);
+    const playlistService = new PlaylistService(apiKey, allowEnvApiKeyFallback);
+    const channelService = new ChannelService(apiKey, allowEnvApiKeyFallback);
 
     // Register static resource for Smithery discovery
     server.registerResource(
