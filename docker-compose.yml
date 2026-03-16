@@ -8,3 +8,5 @@ services:
     environment:
       - NODE_ENV=production
       - YOUTUBE_TRANSCRIPT_LANG=${YOUTUBE_TRANSCRIPT_LANG:-}
+      - KEY_SERVICE_URL=${KEY_SERVICE_URL:-}
+      - KEY_SERVICE_TOKEN=${KEY_SERVICE_TOKEN:-}
