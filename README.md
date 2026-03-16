@@ -153,6 +153,22 @@ Notes:
 * `npm start` runs the local stdio server and expects `YOUTUBE_API_KEY` for YouTube Data API tools.
 * `npm run start:http` runs the hosted Streamable HTTP server and does not require a shared server-wide YouTube API key.
 
+## GitHub Actions Deployment
+
+This repo includes a GitHub Actions workflow at [`.github/workflows/deploy-vps.yml`](./.github/workflows/deploy-vps.yml).
+It runs `npm run build`, `npm run lint`, and `npm run typecheck` on every push to `main`, then deploys to the VPS over SSH.
+
+Required GitHub repository secrets:
+* `VPS_HOST`
+* `VPS_USERNAME`
+* `VPS_SSH_KEY`
+* `VPS_PORT` - Optional if your SSH server uses port `22`
+
+One-time VPS setup before the workflow can deploy successfully:
+* Clone path: `/opt/mcp-servers/youtube`
+* Create `/opt/mcp-servers/youtube/.env` with `KEY_SERVICE_URL` and `KEY_SERVICE_TOKEN`
+* Add the `/youtube/` nginx route from [`deploy/nginx-mcp.conf`](./deploy/nginx-mcp.conf)
+
 ## Architecture
 
 This repo uses a shared service-based MCP design:
