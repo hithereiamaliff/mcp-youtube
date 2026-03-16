@@ -22,24 +22,21 @@
     "typecheck": "tsc --noEmit",
     "dev": "nodemon --exec \"npm run build && npm start\" --ext ts",
     "prepublishOnly": "npm run build",
-
     "bump": "node --loader ts-node/esm scripts/release.ts",
     "publish-npm": "npm publish --access public"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.1.1",
-
     "cors": "^2.8.6",
     "express": "^5.2.1",
     "googleapis": "^129.0.0",
-    "youtube-transcript": "^1.3.0",
+    "youtube-transcript-plus": "^1.2.0",
     "ytdl-core": "^4.11.5",
     "zod": "^3.25.46",
     "zod-to-json-schema": "^3.22.5"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
-
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/node": "^18.0.0",

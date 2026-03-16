@@ -17,6 +17,8 @@ A Model Context Protocol (MCP) server for YouTube that exposes video, channel, p
 * `transcripts_searchTranscript` - Search within a transcript
 * `transcripts_getTimestampedTranscript` - Get transcript segments with human-readable timestamps
 
+Supports both manual captions and auto-generated captions. Powered by `youtube-transcript-plus` which uses YouTube's InnerTube API for reliable caption extraction.
+
 Transcript language behavior:
 * If `YOUTUBE_TRANSCRIPT_LANG` is unset and no per-request `language` is passed, the server lets YouTube choose the default caption track for that video.
 * If `language` is provided, the server requests that specific caption language.
@@ -179,7 +181,7 @@ This repo uses a shared service-based MCP design:
 * `src/http-server.ts` - Hosted Streamable HTTP server with MCP Key Service authentication
 * `src/utils/key-service.ts` - MCP Key Service client (credential resolution with caching)
 * `src/services/` - Service layer for videos, channels, playlists, and transcripts
-* `src/services/transcript-provider.ts` - Transcript adapter layer so the MCP contract stays stable if the underlying provider changes
+* `src/services/transcript-provider.ts` - Transcript adapter layer (uses `youtube-transcript-plus` via InnerTube API) so the MCP contract stays stable if the underlying provider changes
 
 Project structure:
 
@@ -198,8 +200,7 @@ src/
 |   |-- transcript-provider.ts
 |   |-- playlist.ts
 |   `-- channel.ts
-|-- types.ts
-`-- types/
+`-- types.ts
 ```
 
 ## License
