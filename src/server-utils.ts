@@ -37,7 +37,7 @@ export function createYouTubeMcpServer(options?: CreateServerOptions) {
     const playlistService = new PlaylistService(apiKey, allowEnvApiKeyFallback);
     const channelService = new ChannelService(apiKey, allowEnvApiKeyFallback);
 
-    // Register static resource for Smithery discovery
+    // Register static info resource
     server.registerResource(
         'info',
         'youtube://info',

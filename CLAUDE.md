@@ -38,10 +38,10 @@ npm run publish-npm
 
 ### Core Structure
 
-The project uses a **dual-architecture service-based design** with the following layers:
+The project uses a **service-based design** with the following layers:
 
-1. **Shared Utilities** (`src/server-utils.ts`): **🆕 Single source of truth** for all MCP server configuration and registration
-2. **Smithery Entry Point** (`src/index.ts`): Smithery-compatible `createServer` function for MCP platform deployment
+1. **Shared Utilities** (`src/server-utils.ts`): Single source of truth for all MCP server configuration and registration
+2. **Package Entry Point** (`src/index.ts`): Re-exports the shared server factory for direct imports
 3. **CLI Server** (`src/server.ts`): Standalone MCP server with CLI entry point for `npx` usage
 4. **Services** (`src/services/`): Core business logic for interacting with YouTube APIs
    - `VideoService`: Handles video operations with **enhanced URL support** (get video details, search videos)
@@ -84,7 +84,7 @@ This enhancement applies to:
 
 ### MCP Tool Registration & Annotations
 
-Tools are registered in `src/server-utils.ts` using the modern `McpServer.registerTool()` method. **🆕 Now shared between CLI and Smithery deployments**. Each tool has:
+Tools are registered in `src/server-utils.ts` using the modern `McpServer.registerTool()` method. Shared between all deployment modes. Each tool has:
 
 - A name following the pattern `{service}_{operation}` (e.g., `videos_getVideo`)
 - A title and description for the AI model
@@ -122,7 +122,7 @@ server.registerTool(
 **Resource and Prompt Registration:**
 - **Resources**: Static `youtube://info` resource for discovery + dynamic transcript resource
 - **Prompts**: `summarize-video` and `analyze-channel` workflows
-- **All capabilities**: Shared between CLI and Smithery deployments
+- **All capabilities**: Shared between CLI and HTTP deployments
 
 ### API Integration & Type Safety
 
@@ -145,47 +145,35 @@ The project uses **ES modules** (ESNext) as configured in:
 
 | File | Purpose |
 |------|---------|
-| `src/server-utils.ts` | **🆕 Shared MCP server utilities** (tools, resources, prompts) - single source of truth |
-| `src/index.ts` | Smithery-compatible `createServer` function for platform deployment |
+| `src/server-utils.ts` | Shared MCP server utilities (tools, resources, prompts) - single source of truth |
+| `src/index.ts` | Package entry point (re-exports shared server factory) |
 | `src/server.ts` | CLI MCP server with stdio transport. Uses shared utilities. |
 | `src/cli.ts` | CLI wrapper that validates environment variables and starts server |
+| `src/http-server.ts` | Hosted Streamable HTTP server with MCP Key Service authentication |
+| `src/utils/key-service.ts` | MCP Key Service client (credential resolution with caching) |
 | `src/services/video.ts` | Video lookup and search functionality |
 | `src/services/transcript.ts` | Video transcript retrieval |
 | `src/services/playlist.ts` | Playlist operations |
 | `src/services/channel.ts` | Channel information and video listing |
 | `src/types.ts` | TypeScript type definitions for all parameters |
-| `smithery.yaml` | Smithery deployment configuration |
-| `.well-known/mcp-config` | **🆕 MCP configuration schema for Smithery discovery** |
 
 ## Configuration
 
-**🆕 Flexible Configuration Options:**
-
-The server supports multiple configuration methods for optimal user experience:
-
-### Method 1: Smithery Configuration (Recommended)
-- All parameters optional in Smithery UI
-- API key can be provided via config or environment variable
-
-### Method 2: Environment Variables
+### CLI / Local (Environment Variables)
 - `YOUTUBE_API_KEY`: Your YouTube Data API v3 key (required for functionality)
 - `YOUTUBE_TRANSCRIPT_LANG`: Default language for transcripts (optional, defaults to 'en')
 
-### Method 3: Mixed Configuration
-- Use Smithery UI for language preferences
-- Use environment variables for API key security
-
-**Smithery Optimization:**
-- All config parameters are optional for best user experience
-- Comprehensive JSON schema documentation with examples
-- Support for both config UI and environment variables
+### Hosted HTTP (MCP Key Service)
+- `KEY_SERVICE_URL`: URL of the MCP Key Service (e.g., `https://mcpkeys.techmavie.digital`)
+- `KEY_SERVICE_TOKEN`: Server-specific bearer token for the Key Service
+- Users authenticate with `usr_...` keys obtained from the Key Service
 
 ## Available Tools, Resources & Prompts
 
 The MCP server exposes these capabilities:
 
-### Resources (Smithery Optimized)
-- `youtube://info`: **🆕 Static resource** for Smithery discovery and server documentation
+### Resources
+- `youtube://info`: Static resource for server documentation and discovery
 - `youtube://transcript/{videoId}`: Dynamic resource for direct access to video transcripts
 
 ### Prompts
@@ -242,21 +230,20 @@ npx -y @sfiorini/youtube-mcp@x.x.x
 
 Uses the CLI entry point defined in the `bin` field of package.json.
 
-### Smithery Deployment
+### Hosted HTTP Deployment (MCP Key Service)
 
-The package exports a `createServer` function that follows Smithery patterns:
+The HTTP server runs on a VPS and authenticates users via the MCP Key Service (`usr_...` keys).
 
-```typescript
-import createServer from '@sfiorini/youtube-mcp';
-const server = createServer({ config });
+```bash
+npm run start:http
 ```
 
 ### Direct Import
 
-For custom integrations, import the server function directly:
+For custom integrations, import the server factory directly:
 
 ```typescript
-import createServer from '@sfiorini/youtube-mcp';
+import { createYouTubeMcpServer } from '@sfiorini/youtube-mcp';
 ```
 
 ## Build and Distribution
@@ -265,7 +252,7 @@ The project is published as an npm package (`@sfiorini/youtube-mcp`) and can be 
 
 1. TypeScript compiles to JavaScript in `dist/` directory
 2. Both CLI (`dist/cli.js`) and main entry point (`dist/index.js`) are generated
-3. The `main` field points to `dist/index.js` for Smithery compatibility
+3. The `main` field points to `dist/index.js` for package imports
 4. The `bin` field points to `dist/cli.js` for CLI usage
 
 ## Testing and Validation
@@ -276,23 +263,6 @@ The project was recently migrated to ES modules to fix compatibility issues with
 - Verify TypeScript compiles without errors: `npm run build`
 - Run linting and type checking: `npm run lint && npm run typecheck`
 - Test the server can start: `npm start` (requires valid YOUTUBE_API_KEY)
-
-## Smithery Quality Optimization
-
-**🆕 Achieved 90%+ Smithery quality score** through comprehensive improvements:
-
-### Quality Score Breakdown:
-- **Tool Quality**: 26/35 - All 7 tools with proper descriptions, parameters, and annotations
-- **Server Capabilities**: 30/30 - 7 tools + 2 prompts + 1 resource
-- **Server Metadata**: 25/25 - Complete documentation and metadata
-- **Configuration UX**: 25/25 - Optional configuration with comprehensive schema
-
-### Key Optimizations:
-1. **Tool Annotations**: Added `readOnlyHint` and `idempotentHint` to all tools
-2. **Resource Discovery**: Static `youtube://info` resource for Smithery scanning
-3. **Prompt Registration**: Two comprehensive prompts for video/channel analysis
-4. **Flexible Configuration**: All parameters optional with multiple setup methods
-5. **Schema Documentation**: Complete JSON schema with examples and security notes
 
 ## Important Notes
 

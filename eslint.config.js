@@ -4,7 +4,7 @@ import globals from 'globals';
 
 export default tseslint.config(
   {
-    ignores: ['dist/', 'node_modules/', 'coverage/', '.smithery/', '.serena/', 'src/functions/', 'scripts/'],
+    ignores: ['dist/', 'node_modules/', 'coverage/', '.serena/', 'src/functions/', 'scripts/'],
   },
   eslint.configs.recommended,
   ...tseslint.configs.recommended,

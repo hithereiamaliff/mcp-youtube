@@ -1,6 +1,6 @@
 {
   "name": "@sfiorini/youtube-mcp",
-  "version": "0.1.12",
+  "version": "0.2.0",
   "description": "YouTube MCP Server Implementation",
   "type": "module",
   "main": "dist/index.js",
@@ -22,14 +22,13 @@
     "typecheck": "tsc --noEmit",
     "dev": "nodemon --exec \"npm run build && npm start\" --ext ts",
     "prepublishOnly": "npm run build",
-    "smithery:build": "npx smithery build",
-    "smithery:dev": "npx smithery dev",
+
     "bump": "node --loader ts-node/esm scripts/release.ts",
     "publish-npm": "npm publish --access public"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.1.1",
-    "@smithery/sdk": "^1.7.4",
+
     "cors": "^2.8.6",
     "express": "^5.2.1",
     "googleapis": "^129.0.0",
@@ -40,7 +39,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
-    "@smithery/cli": "^1.4.6",
+
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/node": "^18.0.0",

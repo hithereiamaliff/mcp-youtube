@@ -1,14 +1,10 @@
 # YouTube MCP Server
 
-[![smithery badge](https://smithery.ai/badge/@sfiorini/youtube-mcp)](https://smithery.ai/server/@sfiorini/youtube-mcp)
-
 A Model Context Protocol (MCP) server for YouTube that exposes video, channel, playlist, and transcript tools over MCP.
 
 > Fork notice: This repository is a maintained fork of [sfiorini/youtube-mcp](https://github.com/sfiorini/youtube-mcp).
 >
-> Deployment: Available via Smithery and self-hosted VPS with MCP Key Service integration.
->
-> Current package identity: The published Smithery/NPM package remains `@sfiorini/youtube-mcp` for now, while this repository is the maintained GitHub fork behind the fixes.
+> Deployment: Available via self-hosted VPS with MCP Key Service integration, or locally via CLI/npx.
 
 ## Features
 
@@ -41,14 +37,6 @@ Transcript language behavior:
 
 ## Installation
 
-### Smithery
-
-Install via Smithery for Claude Desktop:
-
-```bash
-npx -y @smithery/cli@latest install @sfiorini/youtube-mcp --client claude
-```
-
 ### Hosted Deployment (MCP Key Service)
 
 Register your YouTube API key at [mcpkeys.techmavie.digital](https://mcpkeys.techmavie.digital) to get a `usr_...` key, then use:
@@ -60,22 +48,6 @@ https://mcp.techmavie.digital/youtube/mcp/usr_YOUR_KEY_HERE
 Alternative methods (same endpoint, different key delivery):
 * Query param: `https://mcp.techmavie.digital/youtube/mcp?api_key=usr_...`
 * Header: `X-API-Key: usr_...` to `https://mcp.techmavie.digital/youtube/mcp`
-
-### Hosted HTTP Deployment (Direct Header Auth)
-
-For direct header-based auth without Key Service:
-
-```text
-https://mcp.techmavie.digital/youtube/mcp
-```
-
-Request-scoped config:
-* `x-youtube-api-key` header - required for YouTube Data API tools
-* `youtubeTranscriptLang` query param - optional default transcript language for that request
-
-Notes:
-* The transcript tools can still work without a YouTube Data API key.
-* Raw YouTube API keys in URL paths are not accepted — only `usr_...` keys from the Key Service.
 
 ### Claude Desktop
 
@@ -159,12 +131,6 @@ For VPS/Docker deployment with Key Service:
 * `KEY_SERVICE_TOKEN` - Server-specific bearer token for the Key Service
 * `YOUTUBE_TRANSCRIPT_LANG` - Optional default transcript language
 
-### Smithery Configuration
-
-Smithery config keeps both fields optional:
-* `youtubeApiKey` - For hosted HTTP deployment, Smithery should forward this as the `x-youtube-api-key` header
-* `youtubeTranscriptLang` - Optional. Leave blank to auto-detect from the video's available captions
-
 ### YouTube API Setup
 
 1. Open [Google Cloud Console](https://console.cloud.google.com).
@@ -192,9 +158,9 @@ Notes:
 This repo uses a shared service-based MCP design:
 
 * `src/server-utils.ts` - Registers all tools, resources, and prompts
-* `src/index.ts` - Smithery entry point
+* `src/index.ts` - Package entry point (re-exports shared server factory)
 * `src/cli.ts` and `src/server.ts` - Local stdio startup path
-* `src/http-server.ts` - Hosted Streamable HTTP server with Key Service + direct header auth
+* `src/http-server.ts` - Hosted Streamable HTTP server with MCP Key Service authentication
 * `src/utils/key-service.ts` - MCP Key Service client (credential resolution with caching)
 * `src/services/` - Service layer for videos, channels, playlists, and transcripts
 * `src/services/transcript-provider.ts` - Transcript adapter layer so the MCP contract stays stable if the underlying provider changes
