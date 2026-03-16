@@ -5,7 +5,7 @@ import { TranscriptService } from './services/transcript.js';
 import { PlaylistService } from './services/playlist.js';
 import { ChannelService } from './services/channel.js';
 
-const packageVersion = '0.1.12';
+const packageVersion = '0.2.0';
 
 export interface CreateServerOptions {
     apiKey?: string;
